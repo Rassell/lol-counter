@@ -1,4 +1,32 @@
-type IChampSelectSessionEvent = {
+type IBaseEvent = {
+  eventType: string;
+  uri: string;
+  data?: any;
+};
+
+interface IClientState extends IBaseEvent {
+  data: {
+    action: IClientAction;
+    components: [];
+    id: string;
+    isCorrupted: boolean;
+    isStopped: boolean;
+    isUpToDate: boolean;
+    isUpdateAvailable: boolean;
+    percentPatched: number;
+  };
+  eventType: string;
+  uri: string;
+}
+
+type IClientAction =
+  | 'Idle'
+  | 'ChampSelect'
+  | 'InGame'
+  | 'PostChampSelect'
+  | 'PostGame';
+
+interface IChampSelectSessionEvent extends IBaseEvent {
   data: {
     actions: [IAction[]];
     allowBattleBoost: boolean;
@@ -40,7 +68,7 @@ type IChampSelectSessionEvent = {
   };
   eventType: string;
   uri: string;
-};
+}
 
 type IAction = {
   actorCellId: number;
@@ -49,10 +77,10 @@ type IAction = {
   id: number;
   isAllyAction: boolean;
   isInProgress: boolean;
-  type: "ban";
+  type: 'ban';
 };
 
-type IActionType = "ban" | "pick" | "ten_bans_reveal";
+type IActionType = 'ban' | 'pick' | 'ten_bans_reveal';
 
 type ITeamPlayer = {
   assignedPosition: IPosition;
@@ -69,4 +97,4 @@ type ITeamPlayer = {
   wardSkinId: number;
 };
 
-type IPosition = "middle" | "top" | "jungle" | "bottom" | "utility";
+type IPosition = 'middle' | 'top' | 'jungle' | 'bottom' | 'utility';
