@@ -1,0 +1,22 @@
+{
+  "name": "lol-counter",
+  "version": "1.0.0",
+  "description": "An app to counter your enemies",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "devDependencies": {
+    "electron": "^16.0.2"
+  },
+  "dependencies": {
+    "websocket": "^1.0.34"
+  }
+}
