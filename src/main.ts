@@ -1,8 +1,8 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
-var WebSocketClient = require("websocket").client;
-const path = require("path");
-const { exec } = require('child_process');
+import { app, BrowserWindow } from "electron";
+import { client as WebSocketClient } from "websocket";
+import path = require("path");
+import { exec } from "child_process";
 
 socketToLoL();
 
@@ -47,7 +47,9 @@ app.on("window-all-closed", function () {
 // code. You can also put them in separate files and require them here.
 
 function socketToLoL() {
-  var client = new WebSocketClient({ tlsOptions: { rejectUnauthorized: false } });
+  var client = new WebSocketClient({
+    tlsOptions: { rejectUnauthorized: false },
+  });
 
   client.on("connectFailed", function (error) {
     console.log("Connect Error: " + error.toString());
@@ -71,25 +73,27 @@ function socketToLoL() {
 
     function subscribe() {
       if (connection.connected) {
-        connection.sendUTF("[5,\"OnJsonApiEvent\"]");
+        connection.sendUTF('[5,"OnJsonApiEvent"]');
       }
     }
     subscribe();
   });
 
-  exec('wmic PROCESS WHERE name=\'LeagueClientUx.exe\' GET commandline', (err, stdout) => {
-    if (err) {
-      // node couldn't execute the command
-      return;
+  exec(
+    "wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline",
+    (err, stdout) => {
+      if (err) {
+        // node couldn't execute the command
+        return;
+      }
+
+      const pass = RegExp('"--remoting-auth-token=(.+?)"').exec(stdout)[1];
+      const port = RegExp('"--app-port=(\\d+?)"').exec(stdout)[1];
+
+      client.connect(`wss://127.0.0.1:${port}/`, "wamp", undefined, {
+        authorization:
+          "Basic " + Buffer.from(`riot:${pass}`).toString("base64"),
+      });
     }
-
-    // the *entire* stdout and stderr (buffered)
-    console.log(`stdout: ${stdout}`);
-    // console.log(`stderr: ${stderr}`);
-
-    const pass = RegExp('\"--remoting-auth-token=(.+?)\"').exec(stdout)[1];
-    const port = RegExp('\"--app-port=(\\d+?)\"').exec(stdout)[1];
-
-    client.connect(`wss://127.0.0.1:${port}/`, "wamp", undefined, { "authorization": "Basic " + Buffer.from(`riot:${pass}`).toString("base64") });
-  });
+  );
 }
