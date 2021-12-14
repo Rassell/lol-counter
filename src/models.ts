@@ -1,7 +1,7 @@
 type IBaseEvent = {
   eventType: string;
   uri: string;
-  data?: any;
+  data: any;
 };
 
 interface IClientState extends IBaseEvent {
