@@ -17,7 +17,7 @@ function createWindow() {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadFile("index.html");
+  mainWindow.loadFile("../index.html");
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -84,9 +84,8 @@ function socketToLoL() {
 
   exec(
     "wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline",
-    (err, stdout) => {
-      if (err) {
-        // node couldn't execute the command
+    (err, stdout, stderr) => {
+      if (err || stderr) {
         return;
       }
 
