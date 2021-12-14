@@ -62,7 +62,7 @@ function socketToLoL() {
         });
 
         connection.on('close', function () {
-            client.abort();
+            app.exit();
         });
 
         connection.on('message', function (message) {
