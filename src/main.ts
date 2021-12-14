@@ -1,8 +1,8 @@
 // Modules to control application life and create native browser window
-import { app, BrowserWindow } from "electron";
-import { client as WebSocketClient } from "websocket";
 import path = require("path");
 import { exec } from "child_process";
+import { app, BrowserWindow } from "electron";
+import { client as WebSocketClient } from "websocket";
 
 socketToLoL();
 
@@ -56,18 +56,20 @@ function socketToLoL() {
   });
 
   client.on("connect", function (connection) {
-    console.log("WebSocket Client Connected");
     connection.on("error", function (error) {
       console.log("Connection Error: " + error.toString());
     });
+
     connection.on("close", function () {
-      console.log("echo-protocol Connection Closed");
+      client.abort();
     });
+
     connection.on("message", function (message) {
       if (message.type === "utf8") {
-        console.log("Received: '" + message.utf8Data + "'");
-      } else {
-        console.log("Received 2: '" + message + "'");
+        if (message.utf8Data.includes("/lol-lobby-team-builder/champ-select/v1/session")) {
+          const dataFormatted: IChampSelectSessionEvent = JSON.parse(message.utf8Data);
+          console.log(dataFormatted);
+        }
       }
     });
 
@@ -76,6 +78,7 @@ function socketToLoL() {
         connection.sendUTF('[5,"OnJsonApiEvent"]');
       }
     }
+ 
     subscribe();
   });
 
