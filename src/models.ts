@@ -28,7 +28,7 @@ type IClientAction =
 
 interface IChampSelectSessionEvent extends IBaseEvent {
   data: {
-    actions: [IAction[]];
+    actions: IAction[][];
     allowBattleBoost: boolean;
     allowDuplicatePicks: boolean;
     allowLockedEvents: boolean;
@@ -77,7 +77,7 @@ type IAction = {
   id: number;
   isAllyAction: boolean;
   isInProgress: boolean;
-  type: 'ban';
+  type: IActionType;
 };
 
 type IActionType = 'ban' | 'pick' | 'ten_bans_reveal';

@@ -1,10 +1,8 @@
 // Modules to control application life and create native browser window
 import path = require('path');
-import { exec } from 'child_process';
 import { app, BrowserWindow } from 'electron';
-import { client as WebSocketClient } from 'websocket';
 
-socketToLoL();
+import './background';
 
 function createWindow() {
     // Create the browser window.
@@ -42,90 +40,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit();
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-
-function socketToLoL() {
-    // Avoid issues with LOL SSL certificate
-    var client = new WebSocketClient({
-        tlsOptions: { rejectUnauthorized: false },
-    });
-
-    client.on('connectFailed', function (error) {
-        console.log('Connect Error: ' + error.toString());
-    });
-
-    client.on('connect', function (connection) {
-        connection.on('error', function (error) {
-            console.log('Connection Error: ' + error.toString());
-        });
-
-        connection.on('close', function () {
-            app.exit();
-        });
-
-        connection.on('message', function (message) {
-            // If is a event
-            if (message.type === 'utf8') {
-                const baseEvent: any[] = JSON.parse(message.utf8Data);
-
-                // Check that are events that we want to catch
-                if (baseEvent.length !== 3) return;
-                if (baseEvent[0] !== 8 || baseEvent[1] !== 'OnJsonApiEvent')
-                    return;
-
-                // Parse event data to baseEvent
-                const parsedEvent: IBaseEvent = baseEvent[2];
-                console.log(parsedEvent);
-
-                // Champion select
-                if (
-                    parsedEvent.uri.includes(
-                        '/lol-lobby-team-builder/champ-select/v1/session',
-                    )
-                ) {
-                    console.log(
-                        '/lol-lobby-team-builder/champ-select/v1/session',
-                    );
-                    const champSelectSessionEvent: IChampSelectSessionEvent =
-                        parsedEvent;
-
-                    console.log(champSelectSessionEvent);
-                }
-            }
-        });
-
-        function subscribe() {
-            if (connection.connected) {
-                connection.sendUTF('[5,"OnJsonApiEvent"]');
-            }
-        }
-
-        subscribe();
-    });
-
-    // Execute command to get LoL connections
-    exec(
-        "wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline",
-        (err, stdout, stderr) => {
-            // If there is no LoL open ignore
-            // TODO: Open lol?
-            if (err || stderr) {
-                return;
-            }
-
-            // Regexs to get LoL token and port
-            const pass = RegExp('"--remoting-auth-token=(.+?)"').exec(
-                stdout,
-            )[1];
-            const port = RegExp('"--app-port=(\\d+?)"').exec(stdout)[1];
-
-            // Connect to LoL
-            client.connect(`wss://127.0.0.1:${port}/`, 'wamp', undefined, {
-                authorization:
-                    'Basic ' + Buffer.from(`riot:${pass}`).toString('base64'),
-            });
-        },
-    );
-}
