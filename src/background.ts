@@ -7,6 +7,11 @@ let bannedChampions: number[] = [];
 let pickedChampions: number[] = [];
 
 let connected = false;
+let mainWindow: Electron.BrowserWindow;
+
+export function setMainWindow(win: Electron.BrowserWindow) {
+    mainWindow = win;
+}
 
 // Avoid issues with LOL SSL certificate
 var client = new WebSocketClient({
@@ -94,7 +99,8 @@ client.on('connect', function (connection) {
             if (
                 parsedEvent.uri.includes(
                     '/lol-lobby-team-builder/champ-select/v1/session',
-                )
+                ) &&
+                parsedEvent.data
             ) {
                 const champSelectSessionEvent: IChampSelectSessionEvent =
                     parsedEvent;
@@ -123,7 +129,15 @@ client.on('connect', function (connection) {
                         .map(b => b.championId),
                 );
 
-                console.log(bannedChampions, pickedChampions);
+                console.log({ bans, bannedChampions, picks, pickedChampions });
+                mainWindow.webContents.send(
+                    'bannedChampions',
+                    JSON.stringify(bannedChampions),
+                );
+                mainWindow.webContents.send(
+                    'pickedChampions',
+                    JSON.stringify(pickedChampions),
+                );
             }
         }
     });

@@ -3,7 +3,7 @@ import path = require('path');
 import { app, BrowserWindow } from 'electron';
 import isDev = require('electron-is-dev');
 
-import './background';
+import { setMainWindow } from './background';
 
 function createWindow() {
     // Create the browser window.
@@ -17,6 +17,8 @@ function createWindow() {
         },
     });
 
+    setMainWindow(mainWindow);
+
     const startURL = isDev
         ? 'http://localhost:3000'
         : `file://${path.join(__dirname, '../client/build/index.html')}`;
@@ -24,10 +26,6 @@ function createWindow() {
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
     mainWindow.loadURL(startURL);
-
-    mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.webContents.send('ping', 'whoooooooh!');
-    });
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();

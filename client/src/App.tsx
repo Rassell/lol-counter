@@ -3,8 +3,14 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
-    (window as any).Api.on('ping', (message: any) => {
-        alert(message);
+    const [pickedChampions, setPickedChampions] = React.useState<number[]>([]);
+    const [bannedChampions, setBannedChampions] = React.useState<number[]>([]);
+
+    (window as any).Api.on('bannedChampions', (message: any) => {
+        setBannedChampions(JSON.parse(message));
+    });
+    (window as any).Api.on('pickedChampions', (message: any) => {
+        setPickedChampions(JSON.parse(message));
     });
 
     return (
@@ -14,6 +20,16 @@ function App() {
                 <p>
                     Edit <code>src/App.tsx</code> and save to reload.
                 </p>
+                <ul>
+                    {bannedChampions.map(championId => (
+                        <li key={championId}>{championId}</li>
+                    ))}
+                </ul>
+                <ul>
+                    {pickedChampions.map(championId => (
+                        <li key={championId}>{championId}</li>
+                    ))}
+                </ul>
                 <a
                     className="App-link"
                     href="https://reactjs.org"
