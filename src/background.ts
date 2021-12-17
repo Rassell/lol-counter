@@ -4,10 +4,12 @@ import { app } from 'electron';
 import { client as WebSocketClient } from 'websocket';
 
 let bannedChampions: number[] = [];
-let pickedChampions: number[] = [];
+let enemyPickedChampions: number[] = [];
+let teamPickedChampions: number[] = [];
 
 let connected = false;
 let mainWindow: Electron.BrowserWindow;
+let port = '';
 
 export function setMainWindow(win: Electron.BrowserWindow) {
     mainWindow = win;
@@ -86,7 +88,17 @@ client.on('connect', function (connection) {
                 )
             ) {
                 bannedChampions = [];
-                pickedChampions = [];
+                teamPickedChampions = [];
+                enemyPickedChampions = [];
+            }
+
+            if (parsedEvent.uri.includes('/lol-matchmaking/v1/ready-check')) {
+                fetch(
+                    `https://127.0.0.1:${port}/lol-matchmaking/v1/ready-check/accept`,
+                    { method: 'POST' },
+                )
+                    .then((res: any) => res.json())
+                    .catch((err: any) => console.log(err));
             }
 
             // refresh token
@@ -119,24 +131,45 @@ client.on('connect', function (connection) {
 
                 // picks
                 const picks = champSelectSessionEvent.data.actions[2] || [];
-                pickedChampions = pickedChampions.concat(
+                enemyPickedChampions = enemyPickedChampions.concat(
                     picks
                         .filter(
                             b =>
                                 b.completed &&
-                                !pickedChampions.includes(b.championId),
+                                !b.isAllyAction &&
+                                !enemyPickedChampions.includes(b.championId),
+                        )
+                        .map(b => b.championId),
+                );
+                teamPickedChampions = teamPickedChampions.concat(
+                    picks
+                        .filter(
+                            b =>
+                                b.completed &&
+                                b.isAllyAction &&
+                                !teamPickedChampions.includes(b.championId),
                         )
                         .map(b => b.championId),
                 );
 
-                console.log({ bans, bannedChampions, picks, pickedChampions });
+                console.log({
+                    bans,
+                    bannedChampions,
+                    picks,
+                    teamPickedChampions,
+                    enemyPickedChampions,
+                });
                 mainWindow.webContents.send(
                     'bannedChampions',
                     JSON.stringify(bannedChampions),
                 );
                 mainWindow.webContents.send(
-                    'pickedChampions',
-                    JSON.stringify(pickedChampions),
+                    'teamPickedChampions',
+                    JSON.stringify(teamPickedChampions),
+                );
+                mainWindow.webContents.send(
+                    'enemyPickedChampions',
+                    JSON.stringify(enemyPickedChampions),
                 );
             }
         }
@@ -168,7 +201,7 @@ setInterval(
                     const pass = RegExp('"--remoting-auth-token=(.+?)"').exec(
                         stdout,
                     )[1];
-                    const port = RegExp('"--app-port=(\\d+?)"').exec(stdout)[1];
+                    port = RegExp('"--app-port=(\\d+?)"').exec(stdout)[1];
 
                     // Connect to LoL
                     client.connect(

@@ -99,7 +99,7 @@ type ITeamPlayer = {
 
 type IPosition = 'middle' | 'top' | 'jungle' | 'bottom' | 'utility';
 
-type IChampionData = {
+export type IChampionData = {
     id: number;
     name: string;
     alias: string;

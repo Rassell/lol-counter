@@ -1,43 +1,71 @@
 import React from 'react';
-import logo from './logo.svg';
+import { IChampionData } from './models';
 import './App.css';
 
+function getChampionIcon(id: number) {
+    return `https://cdn.communitydragon.org/latest/champion/${id}/square.png`;
+}
+
+async function getChampionData(id: number): Promise<IChampionData> {
+    const response = await fetch(
+        `https://cdn.communitydragon.org/latest/champion/${id}/data`,
+    );
+    return await response.json();
+}
+
 function App() {
-    const [pickedChampions, setPickedChampions] = React.useState<number[]>([]);
     const [bannedChampions, setBannedChampions] = React.useState<number[]>([]);
+    const [teamPickedChampions, setTeamPickedChampions] = React.useState<
+        number[]
+    >([]);
+    const [enemyPickedChampions, setEnemyPickedChampions] = React.useState<
+        number[]
+    >([]);
 
     (window as any).Api.on('bannedChampions', (message: any) => {
         setBannedChampions(JSON.parse(message));
     });
-    (window as any).Api.on('pickedChampions', (message: any) => {
-        setPickedChampions(JSON.parse(message));
+    (window as any).Api.on('teamPickedChampions', (message: any) => {
+        setTeamPickedChampions(JSON.parse(message));
+    });
+    (window as any).Api.on('enemyPickedChampions', (message: any) => {
+        setEnemyPickedChampions(JSON.parse(message));
     });
 
     return (
         <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
-                <ul>
-                    {bannedChampions.map(championId => (
-                        <li key={championId}>{championId}</li>
+            <div className="bans">
+                <p>Bans</p>
+                {bannedChampions.map(championId => (
+                    <img
+                        key={`bannedChampion${championId}`}
+                        src={getChampionIcon(championId)}
+                        alt={`championImgAlt${championId}`}
+                    />
+                ))}
+            </div>
+            <div className="picks">
+                <div className="team">
+                    <p>My team</p>
+                    {teamPickedChampions.map(championId => (
+                        <img
+                            key={`teamPickedChampion${championId}`}
+                            src={getChampionIcon(championId)}
+                            alt={`championImgAlt${championId}`}
+                        />
                     ))}
-                </ul>
-                <ul>
-                    {pickedChampions.map(championId => (
-                        <li key={championId}>{championId}</li>
+                </div>
+                <div className="enemy">
+                    <p>Enemy team</p>
+                    {enemyPickedChampions.map(championId => (
+                        <img
+                            key={`enemyPickedChampion${championId}`}
+                            src={getChampionIcon(championId)}
+                            alt={`championImgAlt${championId}`}
+                        />
                     ))}
-                </ul>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Learn React
-                </a>
-            </header>
+                </div>
+            </div>
         </div>
     );
 }
