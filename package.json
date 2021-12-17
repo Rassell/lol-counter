@@ -1,25 +1,30 @@
 {
-  "name": "lol-counter",
-  "version": "1.0.0",
-  "description": "An app to counter your enemies",
-  "main": "src/main.ts",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "start": "npm run build && electron ./dist/main.js"
-  },
-  "repository": "https://github.com/Rassell/lol-counter",
-  "keywords": [
-    "Electron",
-    "lol",
-    "counter"
-  ],
-  "devDependencies": {
-    "@types/websocket": "^1.0.4",
-    "electron": "^16.0.2"
-  },
-  "dependencies": {
-    "typescript": "^4.5.4",
-    "websocket": "^1.0.34"
-  }
+    "name": "lol-counter",
+    "version": "1.0.0",
+    "description": "An app to counter your enemies",
+    "main": "src/main.ts",
+    "scripts": {
+        "start": "concurrently \"npm run web:start\" \"wait-on http://localhost:3000 && npm run electron:start\"",
+        "electron:build": "tsc",
+        "electron:watch": "tsc -w",
+        "electron:start": "npm run electron:build && electron ./dist/main.js",
+        "web:start": "cd ./client && npm run-script start"
+    },
+    "repository": "https://github.com/Rassell/lol-counter",
+    "keywords": [
+        "Electron",
+        "lol",
+        "counter"
+    ],
+    "dependencies": {
+        "concurrently": "^6.4.0",
+        "electron-is-dev": "^2.0.0",
+        "typescript": "^4.5.4",
+        "wait-on": "^6.0.0",
+        "websocket": "^1.0.34"
+    },
+    "devDependencies": {
+        "@types/websocket": "^1.0.4",
+        "electron": "^16.0.2"
+    }
 }
