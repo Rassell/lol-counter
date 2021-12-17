@@ -107,7 +107,7 @@ client.on('connect', function (connection) {
 
                 // bans
                 const bans = champSelectSessionEvent.data.actions[0] || [];
-                bannedChampions.concat(
+                bannedChampions = bannedChampions.concat(
                     bans
                         .filter(
                             b =>
@@ -119,7 +119,7 @@ client.on('connect', function (connection) {
 
                 // picks
                 const picks = champSelectSessionEvent.data.actions[2] || [];
-                pickedChampions.concat(
+                pickedChampions = pickedChampions.concat(
                     picks
                         .filter(
                             b =>
