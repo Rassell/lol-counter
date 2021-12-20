@@ -4,8 +4,6 @@ import { app } from 'electron';
 import { client as WebSocketClient } from 'websocket';
 
 let bannedChampions: number[] = [];
-let enemyPickedChampions: number[] = [];
-let teamPickedChampions: number[] = [];
 
 let connected = false;
 let mainWindow: Electron.BrowserWindow;
@@ -82,24 +80,14 @@ client.on('connect', function (connection) {
                 err => err && console.log(err),
             );
 
-            if (
-                parsedEvent.uri.includes(
-                    '/lol-lobby-team-builder/champ-select/v1/bannable-champion-ids',
-                )
-            ) {
-                bannedChampions = [];
-                teamPickedChampions = [];
-                enemyPickedChampions = [];
-            }
-
-            if (parsedEvent.uri.includes('/lol-matchmaking/v1/ready-check')) {
-                fetch(
-                    `https://127.0.0.1:${port}/lol-matchmaking/v1/ready-check/accept`,
-                    { method: 'POST' },
-                )
-                    .then((res: any) => res.json())
-                    .catch((err: any) => console.log(err));
-            }
+            // if (parsedEvent.uri.includes('/lol-matchmaking/v1/ready-check')) {
+            //     fetch(
+            //         `https://127.0.0.1:${port}/lol-matchmaking/v1/ready-check/accept`,
+            //         { method: 'POST' },
+            //     )
+            //         .then((res: any) => res.json())
+            //         .catch((err: any) => console.log(err));
+            // }
 
             // refresh token
             // /lol-league-session/v1/league-session-token
@@ -108,6 +96,8 @@ client.on('connect', function (connection) {
             // Champions owned
             // /lol-champions/v1/owned-champions-minimal
             // Champion select
+            // banneableChampions
+            // '/lol-lobby-team-builder/champ-select/v1/bannable-champion-ids'
             if (
                 parsedEvent.uri.includes(
                     '/lol-lobby-team-builder/champ-select/v1/session',
@@ -123,41 +113,18 @@ client.on('connect', function (connection) {
                     bans
                         .filter(
                             b =>
+                                b.type === 'ban' &&
                                 b.completed &&
                                 !bannedChampions.includes(b.championId),
                         )
                         .map(b => b.championId),
                 );
 
-                // picks
-                const picks = champSelectSessionEvent.data.actions[2] || [];
-                enemyPickedChampions = enemyPickedChampions.concat(
-                    picks
-                        .filter(
-                            b =>
-                                b.completed &&
-                                !b.isAllyAction &&
-                                !enemyPickedChampions.includes(b.championId),
-                        )
-                        .map(b => b.championId),
-                );
-                teamPickedChampions = teamPickedChampions.concat(
-                    picks
-                        .filter(
-                            b =>
-                                b.completed &&
-                                b.isAllyAction &&
-                                !teamPickedChampions.includes(b.championId),
-                        )
-                        .map(b => b.championId),
-                );
-
                 console.log({
-                    bans,
                     bannedChampions,
-                    picks,
-                    teamPickedChampions,
-                    enemyPickedChampions,
+                    teamPickedChampions: champSelectSessionEvent.data.myTeam,
+                    enemyPickedChampions:
+                        champSelectSessionEvent.data.theirTeam,
                 });
                 mainWindow.webContents.send(
                     'bannedChampions',
@@ -165,11 +132,11 @@ client.on('connect', function (connection) {
                 );
                 mainWindow.webContents.send(
                     'teamPickedChampions',
-                    JSON.stringify(teamPickedChampions),
+                    JSON.stringify(champSelectSessionEvent.data.myTeam),
                 );
                 mainWindow.webContents.send(
                     'enemyPickedChampions',
-                    JSON.stringify(enemyPickedChampions),
+                    JSON.stringify(champSelectSessionEvent.data.theirTeam),
                 );
             }
         }

@@ -23,12 +23,15 @@ function App() {
     >([]);
 
     (window as any).Api.on('bannedChampions', (message: any) => {
+        console.log('bannedChampions', message);
         setBannedChampions(JSON.parse(message));
     });
     (window as any).Api.on('teamPickedChampions', (message: any) => {
+        console.log('teamPickedChampions', message);
         setTeamPickedChampions(JSON.parse(message));
     });
     (window as any).Api.on('enemyPickedChampions', (message: any) => {
+        console.log('teamPickedChampions', message);
         setEnemyPickedChampions(JSON.parse(message));
     });
 
