@@ -4,6 +4,7 @@
     "description": "An app to counter your enemies",
     "main": "src/main.ts",
     "scripts": {
+        "postinstall": "cd ./client && npm run-script install",
         "start": "concurrently \"npm run web:start\" \"wait-on http://localhost:3000 && npm run electron:start\"",
         "electron:build": "tsc",
         "electron:watch": "tsc -w",
