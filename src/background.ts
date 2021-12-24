@@ -120,23 +120,20 @@ client.on('connect', function (connection) {
                         .map(b => b.championId),
                 );
 
-                console.log({
-                    bannedChampions,
-                    teamPickedChampions: champSelectSessionEvent.data.myTeam,
-                    enemyPickedChampions:
-                        champSelectSessionEvent.data.theirTeam,
-                });
-                mainWindow.webContents.send(
-                    'bannedChampions',
-                    JSON.stringify(bannedChampions),
-                );
+                // console.log({
+                //     bannedChampions,
+                //     teamPickedChampions: champSelectSessionEvent.data.myTeam,
+                //     enemyPickedChampions:
+                //         champSelectSessionEvent.data.theirTeam,
+                // });
+                mainWindow.webContents.send('bannedChampions', bannedChampions);
                 mainWindow.webContents.send(
                     'teamPickedChampions',
-                    JSON.stringify(champSelectSessionEvent.data.myTeam),
+                    champSelectSessionEvent.data.myTeam,
                 );
                 mainWindow.webContents.send(
                     'enemyPickedChampions',
-                    JSON.stringify(champSelectSessionEvent.data.theirTeam),
+                    champSelectSessionEvent.data.theirTeam,
                 );
             }
         }

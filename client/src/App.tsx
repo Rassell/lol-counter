@@ -2,6 +2,23 @@ import React from 'react';
 import { IChampionData } from './models';
 import './App.css';
 
+type ITeamPlayer = {
+    assignedPosition: IPosition;
+    cellId: number;
+    championId: number;
+    championPickIntent: number;
+    entitledFeatureType: string;
+    playerType: string;
+    selectedSkinId: number;
+    spell1Id: number;
+    spell2Id: number;
+    summonerId: number;
+    team: number;
+    wardSkinId: number;
+};
+
+type IPosition = 'middle' | 'top' | 'jungle' | 'bottom' | 'utility';
+
 function getChampionIcon(id: number) {
     return `https://cdn.communitydragon.org/latest/champion/${id}/square.png`;
 }
@@ -16,23 +33,23 @@ async function getChampionData(id: number): Promise<IChampionData> {
 function App() {
     const [bannedChampions, setBannedChampions] = React.useState<number[]>([]);
     const [teamPickedChampions, setTeamPickedChampions] = React.useState<
-        number[]
+        ITeamPlayer[]
     >([]);
     const [enemyPickedChampions, setEnemyPickedChampions] = React.useState<
-        number[]
+        ITeamPlayer[]
     >([]);
 
     (window as any).Api.on('bannedChampions', (message: any) => {
         console.log('bannedChampions', message);
-        setBannedChampions(JSON.parse(message));
+        setBannedChampions(message);
     });
     (window as any).Api.on('teamPickedChampions', (message: any) => {
         console.log('teamPickedChampions', message);
-        setTeamPickedChampions(JSON.parse(message));
+        setTeamPickedChampions(message);
     });
     (window as any).Api.on('enemyPickedChampions', (message: any) => {
         console.log('teamPickedChampions', message);
-        setEnemyPickedChampions(JSON.parse(message));
+        setEnemyPickedChampions(message);
     });
 
     return (
@@ -50,21 +67,21 @@ function App() {
             <div className="picks">
                 <div className="team">
                     <p>My team</p>
-                    {teamPickedChampions.map(championId => (
+                    {teamPickedChampions.map(pick => (
                         <img
-                            key={`teamPickedChampion${championId}`}
-                            src={getChampionIcon(championId)}
-                            alt={`championImgAlt${championId}`}
+                            key={`teamPickedChampion${pick.championId}`}
+                            src={getChampionIcon(pick.championId)}
+                            alt={`championImgAlt${pick.championId}`}
                         />
                     ))}
                 </div>
                 <div className="enemy">
                     <p>Enemy team</p>
-                    {enemyPickedChampions.map(championId => (
+                    {enemyPickedChampions.map(pick => (
                         <img
-                            key={`enemyPickedChampion${championId}`}
-                            src={getChampionIcon(championId)}
-                            alt={`championImgAlt${championId}`}
+                            key={`enemyPickedChampion${pick.championId}`}
+                            src={getChampionIcon(pick.championId)}
+                            alt={`championImgAlt${pick.championId}`}
                         />
                     ))}
                 </div>
